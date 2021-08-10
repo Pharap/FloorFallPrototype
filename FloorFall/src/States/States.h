@@ -16,5 +16,6 @@
 
 #include "SplashscreenState.h"
 #include "TitlescreenState.h"
+#include "LevelSelectState.h"
 #include "GameplayState.h"
 #include "GameState.h"

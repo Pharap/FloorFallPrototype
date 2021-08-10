@@ -1,5 +1,3 @@
-#pragma once
-
 //
 //  Copyright (C) 2021 Pharap (@Pharap)
 //
@@ -16,15 +14,4 @@
 //  limitations under the License.
 //
 
-#include <stdint.h>
-
-// Broken tiles are designated as zero
-// so that a zero-initialised array consists
-// solely of broken/empty tiles.
-
-enum class TileType : uint8_t
-{
-	Broken,
-	Solid,
-	Button,
-};
+#include "GetSize.h"

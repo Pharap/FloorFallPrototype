@@ -22,5 +22,6 @@ enum class GameState : uint8_t
 {
 	SplashscreenState,
 	TitlescreenState,
+	LevelSelectState,
 	GameplayState,
 };

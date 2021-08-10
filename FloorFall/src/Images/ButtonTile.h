@@ -18,13 +18,20 @@
 
 #include <stdint.h>
 
-// Broken tiles are designated as zero
-// so that a zero-initialised array consists
-// solely of broken/empty tiles.
-
-enum class TileType : uint8_t
+namespace Images
 {
-	Broken,
-	Solid,
-	Button,
-};
+	constexpr uint8_t buttonTileWidth = 8;
+	constexpr uint8_t buttonTileHeight = 8;
+
+	constexpr uint8_t buttonTile[] PROGMEM
+	{
+		// Dimensions
+		buttonTileWidth, buttonTileHeight,
+
+		// Frame 0 - Off
+		0x7E, 0xC3, 0x99, 0xA5, 0xA5, 0x99, 0xC3, 0x7E,
+
+		// Frame 1 - On
+		0x7E, 0xC3, 0x99, 0xBD, 0xBD, 0x99, 0xC3, 0x7E,
+	};
+}

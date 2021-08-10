@@ -25,10 +25,11 @@ class Game
 private:
 	Arduboy2 arduboy;
 
-	GameState gameState { GameState::GameplayState };
+	GameState gameState { GameState::LevelSelectState };
 
 	SplashscreenState splashscreenState;
 	TitlescreenState titlescreenState;
+	LevelSelectState levelSelectState;
 	GameplayState gameplayState;
 
 public:
@@ -45,6 +46,17 @@ public:
 	const Arduboy2 & getArduboy() const
 	{
 		return this->arduboy;
+	}
+
+	void loadMap(const uint8_t * map)
+	{
+		this->gameplayState.loadMap(map);
+	}
+
+	template<size_t mapSize>
+	void loadMap(const uint8_t (& map)[mapSize])
+	{
+		this->gameplayState.loadMap<mapSize>(map);
 	}
 
 public:

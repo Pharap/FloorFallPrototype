@@ -17,14 +17,22 @@
 //
 
 #include <stdint.h>
+#include <avr/pgmspace.h>
 
-// Broken tiles are designated as zero
-// so that a zero-initialised array consists
-// solely of broken/empty tiles.
+#include "../Logic/Tile.h"
 
-enum class TileType : uint8_t
+namespace Levels
 {
-	Broken,
-	Solid,
-	Button,
-};
+	constexpr uint8_t level1[] PROGMEM
+	{
+		// Width, Height
+		5, 1,
+
+		// Player X, Player Y
+		0, 0,
+
+		toTileByte(Tile::makeSolidTile(), Tile::makeBrokenTile(1)),
+		toTileByte(Tile::makeOffButton(), Tile::makeBrokenTile(1)),
+		toTileByte(Tile::makeOffButton(), Tile::makeEmptyTile()),
+	};
+}

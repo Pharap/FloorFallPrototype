@@ -16,9 +16,12 @@
 //  limitations under the License.
 //
 
+#include "Levels.h"
+
 void Game::setup()
 {
 	this->arduboy.begin();
+	this->gameplayState.loadMap(Levels::level0);
 }
 
 void Game::loop()
@@ -47,6 +50,11 @@ void Game::update()
 		case GameState::TitlescreenState:
 			this->titlescreenState.update(*this);
 			this->titlescreenState.render(*this);
+			break;
+
+		case GameState::LevelSelectState:
+			this->levelSelectState.update(*this);
+			this->levelSelectState.render(*this);
 			break;
 
 		case GameState::GameplayState:

@@ -16,15 +16,15 @@
 //  limitations under the License.
 //
 
-#include <stdint.h>
+// For size_t.
+#include <stddef.h>
 
-// Broken tiles are designated as zero
-// so that a zero-initialised array consists
-// solely of broken/empty tiles.
-
-enum class TileType : uint8_t
+namespace Utils
 {
-	Broken,
-	Solid,
-	Button,
-};
+	/// Gets the size of an array.
+	template<typename Type, size_t size>
+	constexpr size_t getSize(Type (&)[size])
+	{
+		return size;
+	}
+}

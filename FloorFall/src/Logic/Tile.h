@@ -40,6 +40,11 @@ public:
 	{
 	}
 
+	constexpr Tile(TileType type) :
+		value { combine(type, 0) }
+	{
+	}
+
 	constexpr Tile(TileType type, uint8_t parameter) :
 		value { combine(type, parameter) }
 	{
@@ -59,6 +64,31 @@ public:
 	{
 		// Clear the old parameter and set the new parameter
 		this->value = (clearParameter(this->value) | toParameter(parameter));
+	}
+
+	static constexpr Tile makeSolidTile()
+	{
+		return Tile(TileType::Solid);
+	}
+
+	static constexpr Tile makeEmptyTile()
+	{
+		return Tile(TileType::Broken, 0);
+	}
+
+	static constexpr Tile makeBrokenTile(uint8_t steps)
+	{
+		return Tile(TileType::Broken, steps);
+	}
+
+	static constexpr Tile makeOnButton()
+	{
+		return Tile(TileType::Button, 1);
+	}
+
+	static constexpr Tile makeOffButton()
+	{
+		return Tile(TileType::Button, 0);
 	}
 
 private:
@@ -92,3 +122,26 @@ private:
 		return (value & ~(parameterMask << parameterShift));
 	}
 };
+
+constexpr uint8_t toTileByte(Tile leftTile, Tile rightTile)
+{
+	return
+		(
+			((static_cast<uint8_t>(leftTile.getType()) & 0x3) << 0) |
+			((static_cast<uint8_t>(leftTile.getParameter()) & 0x3) << 2) |
+			((static_cast<uint8_t>(rightTile.getType()) & 0x3) << 4) |
+			((static_cast<uint8_t>(rightTile.getParameter()) & 0x3) << 6)
+		);
+}
+
+constexpr Tile getLeftTile(uint8_t tileByte)
+{
+	// Construct a tile from the lower nibble
+	return Tile(static_cast<TileType>((tileByte >> 0) & 0x03), ((tileByte >> 2) & 0x03));
+}
+
+constexpr Tile getRightTile(uint8_t tileByte)
+{
+	// Construct a tile from the higher nibble
+	return Tile(static_cast<TileType>((tileByte >> 4) & 0x03), ((tileByte >> 6) & 0x03));
+}

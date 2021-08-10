@@ -16,15 +16,28 @@
 //  limitations under the License.
 //
 
-#include <stdint.h>
+#include "../Levels.h"
+#include "../Utils.h"
 
-// Broken tiles are designated as zero
-// so that a zero-initialised array consists
-// solely of broken/empty tiles.
+class Game;
 
-enum class TileType : uint8_t
+class LevelSelectState
 {
-	Broken,
-	Solid,
-	Button,
+private:
+	// The total number of options (levels).
+	static constexpr uint8_t optionCount = Utils::getSize(Levels::levels);
+
+	// The first index of all options.
+	static constexpr uint8_t firstIndex = 0;
+
+	// The last index of all options.
+	static constexpr uint8_t lastIndex = (optionCount - 1);
+
+private:
+	// The index of the selected level.
+	uint8_t selectedIndex;
+
+public:
+	void update(Game & game);
+	void render(Game & game);
 };

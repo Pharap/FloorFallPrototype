@@ -18,13 +18,9 @@
 
 #include <stdint.h>
 
-// Broken tiles are designated as zero
-// so that a zero-initialised array consists
-// solely of broken/empty tiles.
-
-enum class TileType : uint8_t
+enum class GameplayPhase : uint8_t
 {
-	Broken,
-	Solid,
-	Button,
+	Playing,
+	Success,
+	Failure,
 };
