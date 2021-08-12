@@ -16,10 +16,24 @@
 //  limitations under the License.
 //
 
+// For uint8_t
+#include <stdint.h>
+
 class Game;
 
 class SplashscreenState
 {
+private:
+	static constexpr uint8_t blinkDelayDefault = 2;
+	static constexpr uint8_t blinkDelayVariance = 5;
+	static constexpr uint8_t blinkTickMin = 0;
+	static constexpr uint8_t blinkTickMax = 7;
+
+private:
+	bool blinkInvert { false };
+	uint8_t blinkTick { 0 };
+	uint8_t blinkDelay { blinkDelayDefault };
+
 public:
 	void update(Game & game);
 	void render(Game & game);

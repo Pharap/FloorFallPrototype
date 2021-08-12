@@ -16,23 +16,12 @@
 //  limitations under the License.
 //
 
-// For uint8_t
-#include <stdint.h>
+#include "Language.h"
+#include "Strings.h"
 
-// For PROGMEM
-#include <avr/pgmspace.h>
-
-namespace Images
+namespace Settings
 {
-	constexpr uint8_t solidTileWidth = 8;
-	constexpr uint8_t solidTileHeight = 8;
+	constexpr Language language = Language::EN_GB;
 
-	constexpr uint8_t solidTile[] PROGMEM
-	{
-		// Dimensions
-		solidTileWidth, solidTileHeight,
-
-		// Frame 0 - Solid Tile
-		0x7E, 0xC3, 0x81, 0x81, 0x81, 0x81, 0xC3, 0x7E,
-	};
+	using Strings = LanguageStrings<Settings::language>;
 }

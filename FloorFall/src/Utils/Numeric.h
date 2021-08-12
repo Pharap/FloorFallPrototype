@@ -16,23 +16,19 @@
 //  limitations under the License.
 //
 
-// For uint8_t
-#include <stdint.h>
-
-// For PROGMEM
-#include <avr/pgmspace.h>
-
-namespace Images
+namespace Utils
 {
-	constexpr uint8_t solidTileWidth = 8;
-	constexpr uint8_t solidTileHeight = 8;
-
-	constexpr uint8_t solidTile[] PROGMEM
+	/// Determines whether a value is even.
+	template<typename Type>
+	constexpr bool isEven(Type value)
 	{
-		// Dimensions
-		solidTileWidth, solidTileHeight,
+		return ((value % 2) == 0);
+	}
 
-		// Frame 0 - Solid Tile
-		0x7E, 0xC3, 0x81, 0x81, 0x81, 0x81, 0xC3, 0x7E,
-	};
+	/// Determines whether a value is odd.
+	template<typename Type>
+	constexpr bool isOdd(Type value)
+	{
+		return ((value % 2) != 0);
+	}
 }

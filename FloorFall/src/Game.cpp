@@ -21,7 +21,7 @@
 void Game::setup()
 {
 	this->arduboy.begin();
-	this->gameplayState.loadMap(Levels::level0);
+	this->gameData.loadMap(Levels::level0);
 }
 
 void Game::loop()

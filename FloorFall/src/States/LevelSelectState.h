@@ -33,6 +33,10 @@ private:
 	// The last index of all options.
 	static constexpr uint8_t lastIndex = (optionCount - 1);
 
+	// Drawing coordinates of the board preview.
+	static constexpr uint8_t boardPreviewX = 64;
+	static constexpr uint8_t boardPreviewY = 0;
+
 private:
 	// The index of the selected level.
 	uint8_t selectedIndex;
@@ -40,4 +44,10 @@ private:
 public:
 	void update(Game & game);
 	void render(Game & game);
+
+private:
+	void loadSelectedLevel(Game & game);
+
+	void renderLevelList(Game & game);
+	void renderSelectedLevel(Game & game);
 };

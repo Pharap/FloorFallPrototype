@@ -16,7 +16,11 @@
 //  limitations under the License.
 //
 
+// For uint8_t
 #include <stdint.h>
+
+// For PROGMEM
+#include <avr/pgmspace.h>
 
 namespace Images
 {

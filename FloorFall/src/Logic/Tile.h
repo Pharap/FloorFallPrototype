@@ -66,6 +66,9 @@ public:
 		this->value = (clearParameter(this->value) | toParameter(parameter));
 	}
 
+	// These have to be functions because the 'Tile' type is not
+	// a complete type at this point in the code.
+
 	static constexpr Tile makeSolidTile()
 	{
 		return Tile(TileType::Solid);

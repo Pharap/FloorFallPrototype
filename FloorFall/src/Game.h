@@ -18,19 +18,23 @@
 
 #include <Arduboy2.h>
 
+#include "Strings.h"
 #include "States.h"
+#include "GameData.h"
 
 class Game
 {
 private:
-	Arduboy2 arduboy;
+	Arduboy2 arduboy {};
 
-	GameState gameState { GameState::LevelSelectState };
+	GameState gameState { GameState::SplashscreenState };
 
-	SplashscreenState splashscreenState;
-	TitlescreenState titlescreenState;
-	LevelSelectState levelSelectState;
-	GameplayState gameplayState;
+	SplashscreenState splashscreenState {};
+	TitlescreenState titlescreenState {};
+	LevelSelectState levelSelectState {};
+	GameplayState gameplayState {};
+
+	GameData gameData {};
 
 public:
 	void changeState(GameState gameState)
@@ -48,15 +52,14 @@ public:
 		return this->arduboy;
 	}
 
-	void loadMap(const uint8_t * map)
+	GameData & getGameData()
 	{
-		this->gameplayState.loadMap(map);
+		return this->gameData;
 	}
 
-	template<size_t mapSize>
-	void loadMap(const uint8_t (& map)[mapSize])
+	const GameData & getGameData() const
 	{
-		this->gameplayState.loadMap<mapSize>(map);
+		return this->gameData;
 	}
 
 public:

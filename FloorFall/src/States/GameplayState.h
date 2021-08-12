@@ -16,14 +16,15 @@
 //  limitations under the License.
 //
 
-#include "../Logic.h"
-
 #include <stdint.h>
 #include <stddef.h>
 
 #if defined(DEBUG)
 #include <assert.h>
 #endif
+
+#include "../Logic.h"
+#include "../GameData.h"
 
 #include "GameplayPhase.h"
 
@@ -32,37 +33,12 @@ class Game;
 class GameplayState
 {
 private:
-	// The dimensions of the board.
-	static constexpr uint8_t boardWidth = 8;
-	static constexpr uint8_t boardHeight = 8;
-
-	// The furthest limits of the board.
-	static constexpr uint8_t boardLeft = 0;
-	static constexpr uint8_t boardRight = (boardWidth - 1);
-	static constexpr uint8_t boardTop = 0;
-	static constexpr uint8_t boardBottom = (boardHeight - 1);
-
-	// The dimensions of each tile.
-	static constexpr uint8_t tileWidth = 8;
-	static constexpr uint8_t tileHeight = 8;
+	// Create a private type alias to the game board.
+	using Board = GameData::Board;
 
 private:
-	// The board, represented as a grid of tiles.
-	Tile board[boardHeight][boardWidth] {};
-
-	// The player's position on the board.
-	uint8_t playerX;
-	uint8_t playerY;
-
-	// The number of moves the player has made.
-	uint8_t playerMoves;
-
 	// The phase/state of the game.
 	GameplayPhase phase { GameplayPhase::Playing };
-
-	// Keeps track of the last map loaded.
-	// Necessary for resetting the board.
-	const uint8_t * lastMap { nullptr };
 
 public:
 	// Updates the game logic.
@@ -71,37 +47,27 @@ public:
 	// Renders the game.
 	void render(Game & game);
 
-	// A helper function for map loading.
-	template<size_t mapSize>
-	void loadMap(const uint8_t (& map)[mapSize]);
-
-	// Loads a map.
-	void loadMap(const uint8_t * map);
-
 private:
 	void updatePlayingPhase(Game & game);
 
-	void renderPlayingPhase(Game & game);
+	void renderPlayingPhase(Game & game) const;
 
 	void updateSuccessPhase(Game & game);
 
-	void renderSuccessPhase(Game & game);
+	void renderSuccessPhase(Game & game) const;
 
 	void updateFailurePhase(Game & game);
 
-	void renderFailurePhase(Game & game);
+	void renderFailurePhase(Game & game) const;
 
 	// Handles player input.
 	void updatePlayer(Game & game);
 
 	// Render's the player's character.
-	void renderPlayer(Game & game);
+	void renderPlayer(Game & game) const;
 
-	// Draws the board.
-	void renderBoard(Game & game);
-
-	// Draws a tile.
-	void renderTile(Tile tile, int16_t x, int16_t y);
+	// Draws the board and the player.
+	void renderBoardAndPlayer(Game & game) const;
 
 	// Handles stepping onto a tile.
 	void stepOn(Tile & tile);
@@ -110,43 +76,8 @@ private:
 	void stepOff(Tile & tile);
 
 	// Determines if all buttons are on.
-	bool areAllButtonsOn();
+	bool areAllButtonsOn(const Board & board);
 
 	// Resets the level.
-	void resetLevel();
+	void resetLevel(Game & game);
 };
-
-// Define the loadMap function template
-template<size_t mapSize>
-void GameplayState::loadMap(const uint8_t (& map)[mapSize])
-{
-	// Ensure the map has at least the required 4 byte header
-	static_assert(mapSize > 4, "A map must be at least 4 bytes large");
-
-	// If debugging is enabled, do some extra sanity checks...
-	#if defined(DEBUG)
-	// Read the map dimensions
-	const uint8_t width = pgm_read_byte(&map[0]);
-	const uint8_t height = pgm_read_byte(&map[1]);
-
-	// Ensure that the map is a suitable size
-	assert(width > 0);
-	assert(height > 0);
-	assert(width <= 8);
-	assert(height <= 8);
-
-	// Round the dimensions up to the next nearest multiple of two.
-	const uint8_t evenWidth = (width + (width & 1));
-	const uint8_t evenHeight = (height + (height & 1));
-	
-	// Calculate the expected size of the map
-	const size_t dataSize = ((evenWidth * evenHeight) / (8 / 4));
-	const size_t expectedSize = (4 + dataSize);
-
-	// Ensure that the map is the expected size
-	assert(mapSize == expectedSize);
-	#endif
-
-	// Defer to the actual map loading function
-	this->loadMap(&map[0]);
-}

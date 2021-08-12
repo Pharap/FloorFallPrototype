@@ -14,7 +14,9 @@
 //  limitations under the License.
 //
 
+#include "Titlescreen.h"
 #include "BrokenTile.h"
 #include "SolidTile.h"
 #include "ButtonTile.h"
 #include "Player.h"
+#include "PharapLogo.h"

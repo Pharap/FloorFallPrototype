@@ -19,9 +19,6 @@
 #include "../Game.h"
 #include "../Images.h"
 
-// Include progmem reading funtions for map loading
-#include <avr/pgmspace.h>
-
 void GameplayState::update(Game & game)
 {
 	switch (this->phase)
@@ -63,18 +60,21 @@ void GameplayState::updatePlayingPhase(Game & game)
 	// Update the player.
 	this->updatePlayer(game);
 
+	// Get a read-only reference to the shared game data.
+	const auto & gameData = game.getGameData();
+
 	// If all button tiles are on...
-	if(this->areAllButtonsOn())
+	if(this->areAllButtonsOn(gameData.getBoard()))
 	{
 		// Change the phase to success.
 		this->phase = GameplayPhase::Success;
 	}
 }
 
-void GameplayState::renderPlayingPhase(Game & game)
+void GameplayState::renderPlayingPhase(Game & game) const
 {
-	this->renderBoard(game);
-	this->renderPlayer(game);
+	// Render the board with the player on top.
+	this->renderBoardAndPlayer(game);
 }
 
 void GameplayState::updateSuccessPhase(Game & game)
@@ -91,16 +91,27 @@ void GameplayState::updateSuccessPhase(Game & game)
 		// Return the player to the level select menu.
 		game.changeState(GameState::LevelSelectState);
 	}
+
+	// If the B button was pressed...
+	if(arduboy.justPressed(B_BUTTON))
+	{
+		// Reset the phase to playing.
+		this->phase = GameplayPhase::Playing;
+
+		// Return the player to the level select menu.
+		game.changeState(GameState::LevelSelectState);
+	}
 }
 
-void GameplayState::renderSuccessPhase(Game & game)
+void GameplayState::renderSuccessPhase(Game & game) const
 {
-	this->renderBoard(game);
-	this->renderPlayer(game);
+	// Render the board with the player on top.
+	this->renderBoardAndPlayer(game);
 
 	// Get a reference to the arduboy object.
 	auto & arduboy = game.getArduboy();
 
+	// For now just print in the top left corner.
 	arduboy.setCursor(0, 0);
 	arduboy.println(F("SUCCESS"));
 }
@@ -114,42 +125,63 @@ void GameplayState::updateFailurePhase(Game & game)
 	if(arduboy.justPressed(A_BUTTON))
 	{
 		// Reset the level.
-		this->resetLevel();
+		this->resetLevel(game);
 
 		// Change the phase back to playing.
 		this->phase = GameplayPhase::Playing;
 	}
+
+	// If the B button was pressed...
+	if(arduboy.justPressed(B_BUTTON))
+	{
+		// Reset the phase to playing.
+		this->phase = GameplayPhase::Playing;
+
+		// Return the player to the level select menu.
+		game.changeState(GameState::LevelSelectState);
+	}
 }
 
-void GameplayState::renderFailurePhase(Game & game)
+void GameplayState::renderFailurePhase(Game & game) const
 {
-	this->renderBoard(game);
-	this->renderPlayer(game);
+	// Render the board with the player on top.
+	this->renderBoardAndPlayer(game);
 
 	// Get a reference to the arduboy object.
 	auto & arduboy = game.getArduboy();
 
+	// For now just print in the top left corner.
 	arduboy.setCursor(0, 0);
 	arduboy.println(F("FAILURE"));
 }
 
 void GameplayState::updatePlayer(Game & game)
 {
-	// Get a reference to the arduboy object.
+	// Get a mutable reference to the arduboy object.
 	auto & arduboy = game.getArduboy();
 
-	// Track the player's old position.
-	const auto oldPlayerX = this->playerX;
-	const auto oldPlayerY = this->playerY;
+	// Get a mutable reference to the game data.
+	auto & gameData = game.getGameData();
+
+	// Get a mutable reference to the game board.
+	auto & board = gameData.getBoard();
+
+	// Get a mutable reference to the player's position.
+	auto & playerX = gameData.getPlayerX();
+	auto & playerY = gameData.getPlayerY();
+
+	// Cache a copy of the player's old position.
+	const auto oldPlayerX = playerX;
+	const auto oldPlayerY = playerY;
 
 	// If the player has pressed the left button...
 	if(arduboy.justPressed(LEFT_BUTTON))
 	{
 		// If the player is not on the furthest left tile...
-		if(this->playerX > boardLeft)
+		if(playerX > board.getLeftEdge())
 		{
 			// Move the player left.
-			--this->playerX;
+			--playerX;
 		}
 	}
 
@@ -157,10 +189,10 @@ void GameplayState::updatePlayer(Game & game)
 	if(arduboy.justPressed(RIGHT_BUTTON))
 	{
 		// If the player is not on the furthest right tile...
-		if(this->playerX < boardRight)
+		if(playerX < board.getRightEdge())
 		{
 			// Move the player right
-			++this->playerX;
+			++playerX;
 		}
 	}
 
@@ -168,10 +200,10 @@ void GameplayState::updatePlayer(Game & game)
 	if(arduboy.justPressed(UP_BUTTON))
 	{
 		// If the player is not on the top tile...
-		if(this->playerY > boardTop)
+		if(playerY > board.getTopEdge())
 		{
 			// Move the player up
-			--this->playerY;
+			--playerY;
 		}
 	}
 
@@ -179,96 +211,56 @@ void GameplayState::updatePlayer(Game & game)
 	if(arduboy.justPressed(DOWN_BUTTON))
 	{
 		// If the player is not on the bottom tile...
-		if(this->playerY < boardBottom)
+		if(playerY < board.getBottomEdge())
 		{
 			// Move the player down.
-			++this->playerY;
+			++playerY;
 		}
 	}
 
 	// Figure out if the player has moved.
-	const bool playerMoved = ((this->playerX != oldPlayerX) || (this->playerY != oldPlayerY));
+	const bool playerMoved = ((playerX != oldPlayerX) || (playerY != oldPlayerY));
 
 	// If the player has moved...
 	if(playerMoved)
 	{
 		// Step off the old tile.
-		this->stepOff(board[oldPlayerY][oldPlayerX]);
+		this->stepOff(board.getCell(oldPlayerX, oldPlayerY));
 
 		// Step onto the new tile.
-		this->stepOn(board[this->playerY][this->playerX]);
+		this->stepOn(board.getCell(playerX, playerY));
 	}
 }
 
-void GameplayState::renderPlayer(Game & game)
+void GameplayState::renderPlayer(Game & game) const
 {
-	// Suppress "unused parameter" warnings.
-	static_cast<void>(game);
+	// Get a read-only reference to the game data.
+	const auto & gameData = game.getGameData();
 
 	// Calculate the y position of the player.
-	const uint8_t yOffset = (this->playerY * tileHeight);
+	const uint8_t yOffset = (gameData.getPlayerY() * gameData.getTileHeight());
 
 	// Calculte the x position of the player.
-	const uint8_t xOffset = (this->playerX * tileWidth);
+	const uint8_t xOffset = (gameData.getPlayerX() * gameData.getTileWidth());
 
 	// Draw the player.
 	Sprites::drawSelfMasked(xOffset, yOffset, Images::player, 0);
 }
 
-void GameplayState::renderBoard(Game & game)
+void GameplayState::renderBoardAndPlayer(Game & game) const
 {
-	// Suppress "unused parameter" warnings.
-	static_cast<void>(game);
+	// This function exists primarily because
+	// several different functions will want to
+	// perform this same sequence of actions.
 
-	for(int16_t y = 0; y < boardHeight; ++y)
-	{
-		// Calculate the y position of the tile
-		const int16_t yOffset = (y * tileHeight);
+	// Get a mutable reference to the game data.
+	auto & gameData = game.getGameData();
 
-		for(int16_t x = 0; x < boardWidth; ++x)
-		{
-			// Calculte the x position of the tile
-			const int16_t xOffset = (x * tileWidth);
+	// Draw the game board first.
+	gameData.renderBoard();
 
-			// Get a readonly reference to the tile
-			const auto & tile = board[y][x];
-
-			// Draw the tile
-			this->renderTile(tile, xOffset, yOffset);
-		}
-	}
-}
-
-void GameplayState::renderTile(Tile tile, int16_t x, int16_t y)
-{
-	// Cache the type and the parameter.
-	const auto type = tile.getType();
-	const auto parameter = tile.getParameter();
-
-	// Used to track the sprite to be drawn.
-	const uint8_t * sprite = nullptr;
-
-	// Select a sprite depending on the type of the tile.
-	switch(type)
-	{
-		case TileType::Broken:
-			sprite = Images::brokenTile;
-			break;
-
-		case TileType::Solid:
-			sprite = Images::solidTile;
-			break;
-
-		case TileType::Button:
-			sprite = Images::buttonTile;
-			break;
-	}
-
-	// If sprite is no longer nullptr...
-	// (I.e. if a suitable sprite was found for the tile.)
-	if(sprite != nullptr)
-		// Draw the sprite, using the tile's parameter as the frame index.
-		Sprites::drawOverwrite(x, y, sprite, parameter);
+	// Then draw the player on top of it.
+	this->renderPlayer(game);
 }
 
 void GameplayState::stepOn(Tile & tile)
@@ -351,13 +343,21 @@ void GameplayState::stepOff(Tile & tile)
 	}
 }
 
-bool GameplayState::areAllButtonsOn()
+bool GameplayState::areAllButtonsOn(const Board & board)
 {
-	for(int16_t y = 0; y < boardHeight; ++y)
-		for(int16_t x = 0; x < boardWidth; ++x)
+	// Create an alias for the board's size type.
+	using size_type = Board::size_type;
+
+	// Strictly speaking, for the Arduboy Version
+	// I could get away with just using uint8_t.
+	// But if it doesn't cost much,
+	// there's no harm in a bit of future-proofing.
+
+	for(size_type y = 0; y < board.getHeight(); ++y)
+		for(size_type x = 0; x < board.getWidth(); ++x)
 		{
-			// Get a readonly reference to the tile
-			const auto & tile = board[y][x];
+			// Get a read-only reference to the tile
+			const auto & tile = board.getCell(x, y);
 
 			// If the tile is a button
 			if(tile.getType() == TileType::Button)
@@ -368,63 +368,16 @@ bool GameplayState::areAllButtonsOn()
 		}
 
 	// If the end of the loop was reached
-	// without encountering an off button
+	// (without encountering an off button)
 	// then assume all buttons are on.
 	return true;
 }
 
-void GameplayState::resetLevel()
+void GameplayState::resetLevel(Game & game)
 {
-	// Resetting the level is the same as reloading the last map.
-	this->loadMap(this->lastMap);
-}
+	// Get a mutable reference to the game data.
+	auto & gameData = game.getGameData();
 
-void GameplayState::loadMap(const uint8_t * map)
-{
-	// Read the map dimensions
-	const uint8_t width = pgm_read_byte(&map[0]);
-	const uint8_t height = pgm_read_byte(&map[1]);
-
-	// Read the player position
-	const uint8_t playerX = pgm_read_byte(&map[2]);
-	const uint8_t playerY = pgm_read_byte(&map[3]);
-
-	// If debugging is enabled, do some extra sanity checks...
-	#if defined(DEBUG)
-	// Ensure the player position is valid
-	assert(playerX < width);
-	assert(playerY < height);
-	#endif
-
-	// Set the player position
-	this->playerX = playerX;
-	this->playerY = playerY;
-
-	// Get a pointer to the data area of the map
-	const uint8_t * mapData = &map[4];
-
-	// The index of the current byte of the map.
-	size_t index = 0;
-
-	// Loop through the map data
-	for(uint8_t y = 0; y < height; ++y)
-		for(uint8_t x = 0; x < width; x += 2)
-		{
-			// Read the current byte of map data,
-			// containing two tiles worth of information.
-			const uint8_t mapByte = pgm_read_byte(&mapData[index]);
-
-			// Read the left tile
-			board[y][x + 0] = getLeftTile(mapByte);
-
-			// Read the right tile
-			board[y][x + 1] = getRightTile(mapByte);
-
-			// Move to the next byte
-			++index;
-		}
-
-	// Remember which map was loaded last
-	// to allow the board to be properly reset.
-	this->lastMap = map;
+	// Reload the last map.
+	gameData.reloadLastMap();
 }

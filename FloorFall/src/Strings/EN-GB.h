@@ -16,23 +16,20 @@
 //  limitations under the License.
 //
 
-// For uint8_t
-#include <stdint.h>
-
 // For PROGMEM
 #include <avr/pgmspace.h>
 
-namespace Images
+#include "../Language.h"
+
+// Predeclare template.
+template<Language language>
+struct LanguageStrings;
+
+// Specialise template.
+template<>
+struct LanguageStrings<Language::EN_GB>
 {
-	constexpr uint8_t solidTileWidth = 8;
-	constexpr uint8_t solidTileHeight = 8;
+	static constexpr char pressA[] PROGMEM = "Press A";
 
-	constexpr uint8_t solidTile[] PROGMEM
-	{
-		// Dimensions
-		solidTileWidth, solidTileHeight,
-
-		// Frame 0 - Solid Tile
-		0x7E, 0xC3, 0x81, 0x81, 0x81, 0x81, 0xC3, 0x7E,
-	};
-}
+	static constexpr char level[] PROGMEM = "Level ";
+};

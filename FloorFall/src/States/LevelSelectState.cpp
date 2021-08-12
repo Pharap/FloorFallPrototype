@@ -17,6 +17,8 @@
 //
 
 #include "../Game.h"
+#include "../Settings.h"
+#include "../Flash.h"
 
 void LevelSelectState::update(Game & game)
 {
@@ -28,8 +30,14 @@ void LevelSelectState::update(Game & game)
 	{
 		// If the selected index is greater than the first index...
 		if(this->selectedIndex > firstIndex)
+		{
 			// Decrement the selected index.
 			--this->selectedIndex;
+
+			// The selected level has changed,
+			// so load the selected level.
+			this->loadSelectedLevel(game);
+		}
 	}
 
 	// If the down button was pressed...
@@ -37,29 +45,49 @@ void LevelSelectState::update(Game & game)
 	{
 		// If the selected index is less than the last index...
 		if(this->selectedIndex < lastIndex)
+		{
 			// Increment the selected index.
 			++this->selectedIndex;
+
+			// The selected level has changed,
+			// so load the selected level.
+			this->loadSelectedLevel(game);
+		}
 	}
 
 	// If the A button was pressed...
 	if(arduboy.justPressed(A_BUTTON))
-	{
-		// Read a pointer from the level list.
-		const auto pointer = pgm_read_ptr(&Levels::levels[this->selectedIndex]);
-
-		// Convert it to a valid map pointer.
-		const auto map = static_cast<const uint8_t *>(pointer);
-
-		// Load the map.
-		game.loadMap(map);
-
-		// Change the state to gameplay mode.
-		// (I.e. begin playing the selected level.)
+		// Begin playing the selected level.
 		game.changeState(GameState::GameplayState);
-	}
+
+	// If the B button was pressed...
+	if(arduboy.justPressed(B_BUTTON))
+		// Return the player to the titlescreen.
+		game.changeState(GameState::TitlescreenState);
 }
 
 void LevelSelectState::render(Game & game)
+{
+	this->renderLevelList(game);
+	this->renderSelectedLevel(game);
+}
+
+void LevelSelectState::loadSelectedLevel(Game & game)
+{
+	// Read a pointer from the level list.
+	const auto pointer = pgm_read_ptr(&Levels::levels[this->selectedIndex]);
+
+	// Convert it to a valid map pointer.
+	const auto map = static_cast<const uint8_t *>(pointer);
+
+	// Get a mutable reference to the game data.
+	auto & gameData = game.getGameData();
+
+	// Load the map.
+	gameData.loadMap(map);
+}
+
+void LevelSelectState::renderLevelList(Game & game)
 {
 	// Get a reference to the arduboy object.
 	auto & arduboy = game.getArduboy();
@@ -77,13 +105,25 @@ void LevelSelectState::render(Game & game)
 			// (I.e. if this option is the selected level.)
 			if(offset == 0)
 				// Use an arrow to indicate the selected level.
-				arduboy.print(F("> "));
+				arduboy.print(F("\x10 "));
+
+			// Create a temporary type alias.
+			using Strings = Settings::Strings;
 
 			// Print the level number.
-			arduboy.print(F("Level "));
+			arduboy.print(FlashString(Strings::level));
 			arduboy.print(index);
 		}
 
 		arduboy.println();
 	}
+}
+
+void LevelSelectState::renderSelectedLevel(Game & game)
+{
+	// Get a mutable reference to the game data.
+	auto & gameData = game.getGameData();
+
+	// Render a preview of the board.
+	gameData.renderBoard(boardPreviewX, boardPreviewY);
 }

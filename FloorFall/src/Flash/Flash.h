@@ -1,5 +1,3 @@
-#pragma once
-
 //
 //  Copyright (C) 2021 Pharap (@Pharap)
 //
@@ -16,23 +14,7 @@
 //  limitations under the License.
 //
 
-// For uint8_t
-#include <stdint.h>
-
-// For PROGMEM
-#include <avr/pgmspace.h>
-
-namespace Images
-{
-	constexpr uint8_t solidTileWidth = 8;
-	constexpr uint8_t solidTileHeight = 8;
-
-	constexpr uint8_t solidTile[] PROGMEM
-	{
-		// Dimensions
-		solidTileWidth, solidTileHeight,
-
-		// Frame 0 - Solid Tile
-		0x7E, 0xC3, 0x81, 0x81, 0x81, 0x81, 0xC3, 0x7E,
-	};
-}
+#include "FlashStringHelper.h"
+#include "FlashCharPointer.h"
+#include "FlashString.h"
+#include "KnownSizeFlashString.h"

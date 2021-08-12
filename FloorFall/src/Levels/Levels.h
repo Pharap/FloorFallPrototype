@@ -22,16 +22,16 @@
 #include "Level0.h"
 #include "Level1.h"
 #include "Level2.h"
-// #include "Level3.h"
-// #include "Level4.h"
-// #include "Level5.h"
-// #include "Level6.h"
-// #include "Level7.h"
-// #include "Level8.h"
-// #include "Level9.h"
+#include "Level3.h"
+#include "Level4.h"
+#include "Level5.h"
+#include "Level6.h"
+#include "Level7.h"
+#include "Level8.h"
+#include "Level9.h"
 
-// #include "Level10.h"
-// #include "Level11.h"
+#include "Level10.h"
+#include "Level11.h"
 // #include "Level12.h"
 // #include "Level13.h"
 // #include "Level14.h"
@@ -48,16 +48,16 @@ namespace Levels
 		level0,
 		level1,
 		level2,
-		// level3,
-		// level4,
-		// level5,
-		// level6,
-		// level7,
-		// level8,
-		// level9,
+		level3,
+		level4,
+		level5,
+		level6,
+		level7,
+		level8,
+		level9,
 
-		// level10,
-		// level11,
+		level10,
+		level11,
 		// level12,
 		// level13,
 		// level14,

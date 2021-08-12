@@ -16,8 +16,12 @@
 //  limitations under the License.
 //
 
+
+// For uint8_t
 #include <stdint.h>
 
+// I called this 'Phase' because 'State' was taken.
+// (Perhaps I need to rethink my naming conventions?)
 enum class GameplayPhase : uint8_t
 {
 	Playing,

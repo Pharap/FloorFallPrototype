@@ -1,4 +1,4 @@
-#pragma once
+#include "EN-GB.h"
 
 //
 //  Copyright (C) 2021 Pharap (@Pharap)
@@ -16,23 +16,14 @@
 //  limitations under the License.
 //
 
-// For uint8_t
-#include <stdint.h>
+// Unfortunately it's necessary to 'define' these here
+// despite this not actually providing the compiler with
+// any information that it didn't have before.
 
-// For PROGMEM
-#include <avr/pgmspace.h>
+// It's due to an unfortunate side effect of the
+// header-source split model that C++ inherited from C.
+// C++17 fixed this annoying discrepency by introducing 'inline' variables.
+// But Arduino-land only supports C++11, not C++17.
 
-namespace Images
-{
-	constexpr uint8_t solidTileWidth = 8;
-	constexpr uint8_t solidTileHeight = 8;
-
-	constexpr uint8_t solidTile[] PROGMEM
-	{
-		// Dimensions
-		solidTileWidth, solidTileHeight,
-
-		// Frame 0 - Solid Tile
-		0x7E, 0xC3, 0x81, 0x81, 0x81, 0x81, 0xC3, 0x7E,
-	};
-}
+constexpr char LanguageStrings<Language::EN_GB>::pressA[];
+constexpr char LanguageStrings<Language::EN_GB>::level[];
